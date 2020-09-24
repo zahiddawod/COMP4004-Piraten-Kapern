@@ -6,6 +6,8 @@ import org.junit.runner.RunWith;
 @RunWith(JUnitPlatform.class)
 @SuiteDisplayName("JUnit Platform Suite")
 @SelectClasses({
-        ExampleTest.class
+        TestNetworking.class,
+        TestPlayer.class,
+        TestGame.class
 })
 public class TestSuite {}
