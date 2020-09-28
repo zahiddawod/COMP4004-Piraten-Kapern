@@ -51,6 +51,47 @@ public class TestGame {
     }
 
     @Test
+    public void TestDidRollThreeSkulls() {
+        Game game = new Game();
+        ArrayList<Dice> dices = new ArrayList<>();
+        dices.add(Dice.Diamond);
+        dices.add(Dice.Diamond);
+        dices.add(Dice.Coin);
+        dices.add(Dice.Skull);
+        dices.add(Dice.Parrot);
+        dices.add(Dice.Monkey);
+        dices.add(Dice.Skull);
+        dices.add(Dice.Skull);
+        game.SetDices(dices);
+        assertEquals(true, game.DidRollThreeSkulls());
+    }
+
+    @Test
+    public void TestResetDices() {
+        Game game = new Game();
+        game.RollDices(new int[]{1,2,3,4,5,6,7,8});
+        game.ResetDices();
+        for (int i = 0; i < 8; i++)
+            assertEquals(Dice.Coin, game.GetDices().get(i));
+    }
+
+    @Test
+    public void TestSetDices() {
+        Game game = new Game();
+        ArrayList<Dice> dices = new ArrayList<>();
+        dices.add(Dice.Diamond);
+        dices.add(Dice.Diamond);
+        dices.add(Dice.Diamond);
+        dices.add(Dice.Coin);
+        dices.add(Dice.Parrot);
+        dices.add(Dice.Monkey);
+        dices.add(Dice.Skull);
+        dices.add(Dice.Skull);
+        game.SetDices(dices);
+        assertEquals(dices, game.GetDices());
+    }
+
+    @Test
     public void TestUpdateScore() {
         Game game = new Game();
 
