@@ -41,4 +41,12 @@ public class TestGame {
 
         assertEquals(Game.CLEAR_CONSOLE_LENGTH, result.length()-1);
     }
+
+    @Test
+    public void TestIsGameOver() {
+        Game game = new Game();
+        assertEquals(false, game.IsOver());
+        game.End();
+        assertEquals(true, game.IsOver());
+    }
 }

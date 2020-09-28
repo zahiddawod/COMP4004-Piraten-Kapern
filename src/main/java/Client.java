@@ -51,6 +51,14 @@ public class Client {
         }
     }
 
+    public void Disconnect() {
+        try {
+            this.socket.close();
+            isConnected = false;
+            System.out.println("Disconnected from server.");
+        } catch (IOException e) { e.printStackTrace(); }
+    }
+
     public void SendPlayer() throws IOException {
         out.writeObject(player);
         out.flush();

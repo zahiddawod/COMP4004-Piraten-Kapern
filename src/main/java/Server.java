@@ -66,7 +66,7 @@ public class Server {
                 s.SendPlayers(playerList);
 
             int currentRound = 0, playerTurn = 0; // game starts at round 1 with first player being first one to join
-            while (!game.isGameOver) {
+            while (!game.IsOver()) {
                 currentRound++;
 
                 System.out.println("******** Round " + currentRound + " ********");
@@ -88,7 +88,7 @@ public class Server {
 
                 // results of that round
                 System.out.println(playerList[playerTurn].GetName() + " completed their turn and their score is " + playerList[playerTurn].GetScore());
-                if (playerList[playerTurn].GetScore() >= 6000) game.isGameOver = true;
+                if (playerList[playerTurn].GetScore() >= 6000) game.End();
                 playerTurn++;
                 if (playerTurn >= numPlayers) playerTurn = 0;
             }

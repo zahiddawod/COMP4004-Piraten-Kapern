@@ -7,7 +7,7 @@ public class Game implements Serializable {
     public static final String TITLE = "-=Piraten Kapern=-";
     public static final Client client = new Client("");
 
-    public boolean isGameOver;
+    private boolean isGameOver;
 
     public static void main(String[] args) {
         ClearConsole();
@@ -24,6 +24,9 @@ public class Game implements Serializable {
     public void GameLoop() {
         while (!isGameOver) {
         }
+
+        client.Disconnect();
+        Menu();
     }
 
     public static void Menu() {
@@ -64,7 +67,9 @@ public class Game implements Serializable {
         return winner;
     }
 
+    public boolean IsOver() { return isGameOver; }
+    public void End() { isGameOver = true; }
+
     public static void ClearConsole() { for (int i = 0; i < CLEAR_CONSOLE_LENGTH; i++) System.out.println("\b");  }
     public static void Sleep(int milliseconds) { try { Thread.sleep(milliseconds); } catch (InterruptedException ie) { ie.printStackTrace(); } }
-
 }

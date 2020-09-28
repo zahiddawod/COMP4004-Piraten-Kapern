@@ -22,6 +22,8 @@ public class TestNetworking {
         Client c = new Client("");
         c.Join("localhost");
         assertEquals(true, c.isConnected);
+        c.Disconnect();
+        assertEquals(false, c.isConnected);
         s.Shutdown();
     }
 }
