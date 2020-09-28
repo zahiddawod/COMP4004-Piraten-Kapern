@@ -49,4 +49,41 @@ public class TestGame {
         game.End();
         assertEquals(true, game.IsOver());
     }
+
+    @Test
+    public void TestUpdateScore() {
+        Game game = new Game();
+
+        ArrayList<Dice> dices = new ArrayList<>();
+        dices.add(Dice.Diamond);
+        dices.add(Dice.Diamond);
+        dices.add(Dice.Diamond);
+        dices.add(Dice.Coin);
+        dices.add(Dice.Parrot);
+        dices.add(Dice.Monkey);
+        dices.add(Dice.Skull);
+        dices.add(Dice.Skull);
+        game.SetDices(dices);
+        assertEquals(500, game.UpdateScore());
+
+        dices.clear();
+        dices.add(Dice.Diamond);
+        dices.add(Dice.Diamond);
+        dices.add(Dice.Coin);
+        dices.add(Dice.Skull);
+        dices.add(Dice.Parrot);
+        dices.add(Dice.Monkey);
+        dices.add(Dice.Skull);
+        dices.add(Dice.Skull);
+        game.SetDices(dices);
+        assertEquals(0, game.UpdateScore());
+    }
+
+    @Test
+    public void TestRandomRoll() {
+        Game game = new Game();
+        assertEquals(true, game.RollDices(new int[]{1,2,3,7,6}));
+        assertEquals(false, game.RollDices(new int[]{8}));
+        assertEquals(false, game.RollDices(new int[]{1,2,3,4,5,6,7,8,9,10,11}));
+    }
 }
