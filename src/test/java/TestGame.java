@@ -57,12 +57,14 @@ public class TestGame {
         dices.add(Dice.Diamond);
         dices.add(Dice.Diamond);
         dices.add(Dice.Coin);
-        dices.add(Dice.Skull);
+        dices.add(Dice.Parrot);
         dices.add(Dice.Parrot);
         dices.add(Dice.Monkey);
-        dices.add(Dice.Skull);
+        dices.add(Dice.Diamond);
         dices.add(Dice.Skull);
         game.SetDices(dices);
+        assertEquals(false, game.DidRollThreeSkulls());
+        game.SetDrawnCard(FortuneCard.SkullTwo);
         assertEquals(true, game.DidRollThreeSkulls());
     }
 
@@ -94,7 +96,6 @@ public class TestGame {
     @Test
     public void TestUpdateScore() {
         Game game = new Game();
-
         ArrayList<Dice> dices = new ArrayList<>();
         dices.add(Dice.Diamond);
         dices.add(Dice.Diamond);
@@ -105,18 +106,35 @@ public class TestGame {
         dices.add(Dice.Skull);
         dices.add(Dice.Skull);
         game.SetDices(dices);
-        assertEquals(500, game.UpdateScore());
+        game.SetDrawnCard(FortuneCard.Captain);
+        assertEquals(1000, game.UpdateScore());
 
         dices.clear();
         dices.add(Dice.Diamond);
         dices.add(Dice.Diamond);
         dices.add(Dice.Coin);
-        dices.add(Dice.Skull);
+        dices.add(Dice.Coin);
         dices.add(Dice.Parrot);
         dices.add(Dice.Monkey);
         dices.add(Dice.Skull);
         dices.add(Dice.Skull);
         game.SetDices(dices);
+        game.SetDrawnCard(FortuneCard.Diamond);
+        assertEquals(600, game.UpdateScore());
+
+        dices.clear();
+        dices.add(Dice.Diamond);
+        dices.add(Dice.Diamond);
+        dices.add(Dice.Coin);
+        dices.add(Dice.Diamond);
+        dices.add(Dice.Parrot);
+        dices.add(Dice.Monkey);
+        dices.add(Dice.Monkey);
+        dices.add(Dice.Skull);
+        game.SetDrawnCard(FortuneCard.SkullOne);
+        game.SetDices(dices);
+        assertEquals(500, game.UpdateScore());
+        game.SetDrawnCard(FortuneCard.SkullTwo);
         assertEquals(0, game.UpdateScore());
     }
 
@@ -126,5 +144,20 @@ public class TestGame {
         assertEquals(true, game.RollDices(new int[]{1,2,3,7,6}));
         assertEquals(false, game.RollDices(new int[]{8}));
         assertEquals(false, game.RollDices(new int[]{1,2,3,4,5,6,7,8,9,10,11}));
+    }
+
+    @Test
+    public void TestInitDeck() {
+        Game game = new Game();
+        game.InitializeDeck();
+        assertEquals(35, game.GetDeck().size());
+    }
+
+    @Test
+    public void TestDrawCard() {
+        Game game = new Game();
+        for (int i = 0; i < 36; i++)
+            game.DrawCard();
+        assertEquals(34, game.GetDeck().size());
     }
 }
