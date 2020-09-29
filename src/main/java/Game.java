@@ -9,6 +9,8 @@ public class Game implements Serializable {
 
     private boolean isGameOver;
     private ArrayList<Dice> dices = new ArrayList<>();
+    private ArrayList<FortuneCard> deck = new ArrayList<>();
+    private FortuneCard drawnCard;
 
     public static void main(String[] args) {
         ClearConsole();
@@ -21,6 +23,7 @@ public class Game implements Serializable {
     public Game() {
         this.isGameOver = false;
         ResetDices();
+        InitializeDeck();
     }
 
     public void GameLoop() {
@@ -36,6 +39,8 @@ public class Game implements Serializable {
             System.out.println("******** Round " + currentRound + " ********");
             if (client.player.GetID() == playerTurn) {
                 // draw fortune card
+                drawnCard = client.GetCard();
+                System.out.println("Fortune Card Dealt ~ " + drawnCard);
 
                 // roll all 8 dice
                 RollDices(new int[]{1,2,3,4,5,6,7,8});
@@ -150,29 +155,56 @@ public class Game implements Serializable {
     public int UpdateScore() {
         int totalScore = 0;
         HashMap<Dice, Integer> sets = new HashMap<>();
-        for (Dice d : Dice.values()) sets.put(d, 0);
+        for (Dice d : Dice.values()) sets.put(d, 0); // populate hashmap
 
-        for (int i = 0; i < dices.size(); i++)
+        for (int i = 0; i < dices.size(); i++) // check how many times each dice occurs in set
             sets.replace(dices.get(i), sets.get(dices.get(i)) + 1);
 
-        if (sets.get(Dice.Skull) >= 3) return 0;
+        // check for bonus from drawn fortune card
+        if (drawnCard == FortuneCard.Coin)
+            sets.replace(Dice.Coin, sets.get(Dice.Coin) + 1);
+        else if (drawnCard == FortuneCard.Diamond)
+            sets.replace(Dice.Diamond, sets.get(Dice.Diamond) + 1);
+        else if (drawnCard == FortuneCard.SkullOne)
+            sets.replace(Dice.Skull, sets.get(Dice.Skull) + 1);
+        else if (drawnCard == FortuneCard.SkullTwo)
+            sets.replace(Dice.Skull, sets.get(Dice.Skull) + 2);
 
-        for (Map.Entry<Dice, Integer> s : sets.entrySet()) {
-            if (s.getValue() == 3) totalScore += 100;
-            else if (s.getValue() == 4) totalScore += 200;
-            else if (s.getValue() == 5) totalScore += 500;
-            else if (s.getValue() == 6) totalScore += 1000;
-            else if (s.getValue() == 7) totalScore += 2000;
-            else if (s.getValue() == 8) totalScore += 4000;
-        }
+        if (sets.get(Dice.Skull) >= 3) return 0; // player gets nothing if 3 or more skulls were drawn
+
+        Map<Integer, Integer> pointsForIdentical = new HashMap<Integer, Integer>() {{ put(3, 100); put(4, 200); put(5, 500); put(6, 1000); put(7, 2000); put (8, 4000); }};
+        for (Map.Entry<Dice, Integer> s : sets.entrySet()) // account for sets of identical dices
+            totalScore += pointsForIdentical.getOrDefault(s.getValue(), 0);
 
         totalScore += sets.get(Dice.Diamond) * 100;
         totalScore += sets.get(Dice.Coin) * 100;
+
+        if (drawnCard == FortuneCard.Captain) totalScore *= 2;
 
         System.out.println("Current Score: " + client.player.GetScore());
         System.out.println("Potential Score: " + (client.player.GetScore() + totalScore));
 
         return totalScore;
+    }
+
+    public void InitializeDeck() {
+        deck.clear();
+        for (int i = 0; i < 4; i++) {
+            deck.add(FortuneCard.Coin);
+            deck.add(FortuneCard.Diamond);
+            deck.add(FortuneCard.Sorceress);
+            deck.add(FortuneCard.Captain);
+            deck.add(FortuneCard.TreasureChest);
+            deck.add(FortuneCard.MonkeyBusiness);
+            if (i < 3) deck.add(FortuneCard.SkullOne);
+            if (i < 2) {
+                deck.add(FortuneCard.SkullTwo);
+                deck.add(FortuneCard.SabreTwo);
+                deck.add(FortuneCard.SabreThree);
+                deck.add(FortuneCard.SabreFour);
+            }
+        }
+        Collections.shuffle(deck);
     }
 
     public void ResetDices() {
@@ -182,14 +214,27 @@ public class Game implements Serializable {
 
     public boolean DidRollThreeSkulls() {
         int counter = 0;
+        if (drawnCard == FortuneCard.SkullOne) counter = 1;
+        else if (drawnCard == FortuneCard.SkullTwo) counter = 2;
         for (Dice d : dices) {
             if (d.equals(Dice.Skull)) counter++;
             if (counter >= 3) return true;
         }
         return false;
     }
+
+    public FortuneCard DrawCard() {
+        if (deck.size() == 0) InitializeDeck();
+        int topCard = deck.size()-1;
+        drawnCard = deck.get(topCard);
+        deck.remove(topCard);
+        return drawnCard;
+    }
+
     public void SetDices(ArrayList<Dice> list) { dices = list; }
     public ArrayList<Dice> GetDices() { return dices; }
+    public ArrayList<FortuneCard> GetDeck() { return deck; }
+    public void SetDrawnCard(FortuneCard card) { drawnCard = card; }
     public boolean IsOver() { return isGameOver; }
     public void End() { isGameOver = true; }
 

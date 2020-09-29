@@ -67,7 +67,7 @@ public class Server {
 
             int currentRound = 0, playerTurn = 0; // game starts at round 1 with first player being first one to join
             while (!game.IsOver()) {
-                currentRound++;
+                if (playerTurn == 0) currentRound++;
 
                 System.out.println("******** Round " + currentRound + " ********");
 
@@ -76,6 +76,9 @@ public class Server {
                     sockets.get(i).SendInt(currentRound);
                     sockets.get(i).SendInt(playerTurn);
                 }
+
+                sockets.get(playerTurn).out.writeObject(game.DrawCard());
+                sockets.get(playerTurn).out.flush();
 
                 // wait for whoever turn it is to get their new score
                 int result = sockets.get(playerTurn).GetInt();

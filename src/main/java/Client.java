@@ -73,6 +73,17 @@ public class Client {
         }
     }
 
+    public FortuneCard GetCard() {
+        try {
+            return (FortuneCard) in.readObject();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public void UpdatePlayerList() {
         try {
             for (int i = 0; i < playerList.length; i++)
