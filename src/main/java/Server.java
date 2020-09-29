@@ -38,7 +38,8 @@ public class Server {
                 // update player on server's playerList
                 Player p = (Player) socketThread.in.readObject();
                 System.out.println("[SERVER] " + p.GetName() + " has joined!");
-                playerList[socketThread.playerId] = p;
+                playerList[socketThread.playerId] = new Player(p.GetName());
+                playerList[socketThread.playerId].SetID(socketThread.playerId);
 
                 socketThread.SendInt(socketThread.playerId); // send player's id to client
 
@@ -65,11 +66,9 @@ public class Server {
             for (SocketHandler s : sockets)
                 s.SendPlayers(playerList);
 
-            int currentRound = 0, playerTurn = 0; // game starts at round 1 with first player being first one to join
+            int currentRound = 0, playerTurn = 0, playerWhoFirstReached6000 = -1; // game starts at round 1 with first player being first one to join
             while (!game.IsOver()) {
-                if (playerTurn == 0) currentRound++;
-
-                System.out.println("******** Round " + currentRound + " ********");
+                if (playerTurn == 0) System.out.println("******** Round " + (++currentRound) + " ********");
 
                 // update players on round info
                 for (int i = 0; i < numPlayers; i++) {
@@ -77,12 +76,13 @@ public class Server {
                     sockets.get(i).SendInt(playerTurn);
                 }
 
+                // draw card and send it to the current player
                 sockets.get(playerTurn).out.writeObject(game.DrawCard());
                 sockets.get(playerTurn).out.flush();
 
                 // wait for whoever turn it is to get their new score
                 int result = sockets.get(playerTurn).GetInt();
-                playerList[playerTurn].SetScore(result);
+                playerList[playerTurn].SetScore(playerList[playerTurn].GetScore() + result);
 
                 // update player scores for everyone
                 for (SocketHandler s : sockets)
@@ -90,19 +90,24 @@ public class Server {
                         s.SendInt(playerList[i].GetScore());
 
                 // results of that round
-                System.out.println(playerList[playerTurn].GetName() + " completed their turn and their score is " + playerList[playerTurn].GetScore());
-                if (playerList[playerTurn].GetScore() >= 6000) game.End();
+                if (result == 0) System.out.println(playerList[playerTurn].GetName() + " got SKULLED!");
+                else System.out.println(playerList[playerTurn].GetName() + " ended their turn with a new score of " + playerList[playerTurn].GetScore());
+                if (playerList[playerTurn].GetScore() >= 6000) { // someone reached 6000 initiate final round
+                    playerWhoFirstReached6000 = playerTurn;
+                    currentRound = -1;
+                    System.out.println("******** Final Round ********");
+                }
                 playerTurn++;
-                if (playerTurn >= numPlayers) playerTurn = 0;
+                if (playerTurn >= numPlayers) playerTurn = 0; // loop back to the first player in the list
+                if (playerTurn == playerWhoFirstReached6000) game.End(); // everyone played one last turn
+                for (SocketHandler s : sockets) s.SendInt(game.IsOver() ? 1 : 0); // update everyone if the game is over
             }
 
-            // find the winner
-            Player p = game.GetWinner(playerList);
-            System.out.println("The winner is " + p.GetName());
-            for (int i = 0; i < sockets.size(); i++) {
-                sockets.get(i).out.writeObject(p);
-                sockets.get(i).out.flush();
-            }
+            System.out.println("******** Game Over ********");
+            Player winner = game.GetWinner(playerList);
+            System.out.println("******** Winner is " + winner.GetName() + "! ********");
+            for (int i = 0; i < playerList.length; i++)
+                System.out.println(playerList[i].GetName() + ": " + playerList[i].GetScore());
         } catch (IOException e) {
             e.printStackTrace();
         }

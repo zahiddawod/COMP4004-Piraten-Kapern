@@ -87,7 +87,7 @@ public class Client {
     public void UpdatePlayerList() {
         try {
             for (int i = 0; i < playerList.length; i++)
-                playerList[i] = (Player)in.readObject();
+                playerList[i] = (Player) in.readObject();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {

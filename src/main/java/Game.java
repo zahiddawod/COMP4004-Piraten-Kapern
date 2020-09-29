@@ -34,9 +34,9 @@ public class Game implements Serializable {
             ClearConsole();
             System.out.println("******** Score Sheet ********");
             for (int i = 0; i < client.playerList.length; i++)
-                System.out.println(client.playerList[i].GetName() + ": " + client.playerList[i].GetScore() + (client.playerList[i].GetName().equals(client.player.GetName()) ? " (You)" : "") + (i == playerTurn ? " (Turn)" : ""));
+                System.out.println(client.playerList[i].GetName() + ": " + client.playerList[i].GetScore() + (client.playerList[i].GetID() == client.player.GetID() ? " (You)" : "") + (i == playerTurn ? " (Turn)" : ""));
 
-            System.out.println("******** Round " + currentRound + " ********");
+            System.out.println("******** " + (currentRound == -1 ? "Final Round" : "Round " + currentRound) + " ********");
             if (client.player.GetID() == playerTurn) {
                 // draw fortune card
                 drawnCard = client.GetCard();
@@ -79,16 +79,33 @@ public class Game implements Serializable {
                         }
                     }
                 } while (option != 0);
-                client.player.SetScore(client.player.GetScore() + UpdateScore());
-                client.SendInt(client.player.GetScore());
+                int addToScore = UpdateScore();
+                client.player.SetScore(client.player.GetScore() + addToScore);
+                client.SendInt(addToScore);
             } else {
                 System.out.println("Waiting for " + client.playerList[playerTurn].GetName() + " to complete their turn..");
             }
             ResetDices();
             for (int i = 0; i < client.playerList.length; i++) // update player scores
                 client.playerList[i].SetScore(client.GetInt());
-            for (Player p : client.playerList) if (p.GetScore() >= 6000) isGameOver = true;
+            isGameOver = (client.GetInt() > 0);
         }
+
+        // display winner
+        ClearConsole();
+        System.out.println("******** Game Over ********");
+        Player winner = GetWinner(client.playerList);
+        System.out.println("******** Winner is " + winner.GetName() + "! ********");
+        for (int i = 0; i < client.playerList.length; i++)
+            System.out.println(client.playerList[i].GetName() + ": " + client.playerList[i].GetScore());
+
+        // wait for user input to leave
+        int option;
+        Scanner input = new Scanner(System.in);
+        do {
+            System.out.println("0. Leave");
+            option = input.nextInt();
+        } while (option != 0);
 
         client.Disconnect();
         Menu();
