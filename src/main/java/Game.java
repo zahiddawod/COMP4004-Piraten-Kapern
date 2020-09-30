@@ -6,6 +6,9 @@ public class Game implements Serializable {
     public static final int CLEAR_CONSOLE_LENGTH = 50;
     public static final String TITLE = "-=Piraten Kapern=-";
     public static final Client client = new Client("");
+    public static boolean TEST_MODE;
+
+    public int currentRound;
 
     private boolean isGameOver;
     private ArrayList<Dice> dices = new ArrayList<>();
@@ -26,89 +29,110 @@ public class Game implements Serializable {
         InitializeDeck();
     }
 
-    public void GameLoop() {
+    public void GameLoop(Client c) {
+        if (c == null) c = Game.client;
         while (!isGameOver) {
-            int currentRound = client.GetInt();
-            int playerTurn = client.GetInt();
+            currentRound = c.GetInt();
+            int playerTurn = c.GetInt();
 
             ClearConsole();
             System.out.println("******** Score Sheet ********");
-            for (int i = 0; i < client.playerList.length; i++)
-                System.out.println(client.playerList[i].GetName() + ": " + client.playerList[i].GetScore() + (client.playerList[i].GetID() == client.player.GetID() ? " (You)" : "") + (i == playerTurn ? " (Turn)" : ""));
+            for (int i = 0; i < c.playerList.length; i++)
+                System.out.println(c.playerList[i].GetName() + ": " + c.playerList[i].GetScore() + (c.playerList[i].GetID() == c.player.GetID() ? " (You)" : "") + (i == playerTurn ? " (Turn)" : ""));
 
             System.out.println("******** " + (currentRound == -1 ? "Final Round" : "Round " + currentRound) + " ********");
-            if (client.player.GetID() == playerTurn) {
+            if (c.player.GetID() == playerTurn) {
                 // draw fortune card
-                drawnCard = client.GetCard();
-                System.out.println("Fortune Card Dealt ~ " + drawnCard);
+                drawnCard = c.GetCard();
 
-                // roll all 8 dice
-                RollDices(new int[]{1,2,3,4,5,6,7,8});
+                if (TEST_MODE) {
+                    if (c.player.GetName().contains("test40")) {
+                        if (c.player.GetName().equals("p1test40"))
+                            SetDices(new ArrayList<Dice>() {{ add(Dice.Skull); add(Dice.Skull); add(Dice.Skull); add(Dice.Parrot); add(Dice.Sword); add(Dice.Coin); add(Dice.Coin); add(Dice.Diamond); }});
+                        else if (c.player.GetName().equals("p2test40"))
+                            SetDices(new ArrayList<Dice>() {{ add(Dice.Skull); add(Dice.Parrot); add(Dice.Parrot); add(Dice.Parrot); add(Dice.Sword); add(Dice.Monkey); add(Dice.Monkey); add(Dice.Sword); }});
+                        else if (c.player.GetName().equals("p3test40")) {
+                            drawnCard = FortuneCard.Captain;
+                            SetDices(new ArrayList<Dice>() {{ add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); }});
+                        }
+                    } else if (c.player.GetName().contains("test43")) {
+                        if (c.player.GetName().equals("p1test43"))
+                            SetDices(new ArrayList<Dice>() {{ add(Dice.Skull); add(Dice.Parrot); add(Dice.Skull); add(Dice.Parrot); add(Dice.Sword); add(Dice.Coin); add(Dice.Coin); add(Dice.Diamond); }});
+                        else if (c.player.GetName().equals("p2test43")) {
+                            drawnCard = FortuneCard.SkullTwo;
+                            SetDices(new ArrayList<Dice>() {{ add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); }});
+                        } else if (c.player.GetName().equals("p3test43"))
+                            SetDices(new ArrayList<Dice>() {{ add(Dice.Skull); add(Dice.Parrot); add(Dice.Diamond); add(Dice.Parrot); add(Dice.Sword); add(Dice.Monkey); add(Dice.Monkey); add(Dice.Sword); }});
+                    }
+                    System.out.println("Fortune Card Dealt ~ " + drawnCard);
+                    DisplayDices();
+                } else {
+                    System.out.println("Fortune Card Dealt ~ " + drawnCard);
+                    RollDices(new int[]{1,2,3,4,5,6,7,8}); // roll all 8 dice
+                }
 
                 int option = 0;
                 do {
                     if (DidRollThreeSkulls()) {
-                        option = 0;
                         Sleep(2000);
-                    } else {
-                        // choose
-                        System.out.println("\nSelect an option:");
-                        System.out.println("1. Re-roll");
-                        System.out.println("0. End Turn");
+                        break;
+                    }
+                    System.out.println("\nSelect an option:");
+                    System.out.println("1. Re-roll");
+                    System.out.println("0. End Turn");
 
-                        Scanner input = new Scanner(System.in);
-                        option = input.nextInt();
-                        if (option == 1) {
-                            // ask which dices they want to re-roll
-                            System.out.println("Select which dice you would like to re-roll by it's corresponding number. (EX: '1, 3, 4, 5')");
+                    Scanner input = new Scanner(System.in);
+                    if (!TEST_MODE) option = input.nextInt();
+                    if (option == 1) {
+                        System.out.println("NOTE: You must re-roll at least 2 dices.");
+                        System.out.println("Select which dice you would like to re-roll by it's corresponding number. (Example: '1,3,5')");
+                        String line = "0";
+                        String[] choices;
+                        Scanner scanner = new Scanner(System.in);
+                        do {
+                            if (scanner.hasNext()) line = scanner.nextLine();
+                            choices = line.trim().split("\\s*,\\s*");
+                            if (choices.length == 1 && Integer.parseInt(choices[0]) == 0) break;
+                        } while (choices.length < 2);
 
-                            String line = "0";
-                            String[] choices;
-                            Scanner scanner = new Scanner(System.in);
-                            do {
-                                System.out.println("NOTE: You must re-roll at least 2 dices.");
-                                if (scanner.hasNext()) line = scanner.nextLine();
-                                choices = line.trim().split("\\s*,\\s*");
-                                if (choices.length == 1 && Integer.parseInt(choices[0]) == 0) break;
-                            } while (choices.length < 2);
-
-                            int[] dicesToReRoll = new int[choices.length];
-                            for (int i = 0; i < choices.length; i++)
-                                dicesToReRoll[i] = Integer.parseInt(choices[i]);
-                            RollDices(dicesToReRoll);
-                        }
+                        int[] dicesToReRoll = new int[choices.length];
+                        for (int i = 0; i < choices.length; i++)
+                            dicesToReRoll[i] = Integer.parseInt(choices[i]);
+                        RollDices(dicesToReRoll);
                     }
                 } while (option != 0);
                 int addToScore = UpdateScore();
-                client.player.SetScore(client.player.GetScore() + addToScore);
-                client.SendInt(addToScore);
+                c.player.SetScore(c.player.GetScore() + addToScore);
+                c.SendInt(addToScore);
             } else {
-                System.out.println("Waiting for " + client.playerList[playerTurn].GetName() + " to complete their turn..");
+                System.out.println("Waiting for " + c.playerList[playerTurn].GetName() + " to complete their turn..");
             }
             ResetDices();
-            for (int i = 0; i < client.playerList.length; i++) // update player scores
-                client.playerList[i].SetScore(client.GetInt());
-            isGameOver = (client.GetInt() > 0);
+            for (int i = 0; i < c.playerList.length; i++) // update player scores
+                c.playerList[i].SetScore(c.GetInt());
+            isGameOver = (c.GetInt() > 0);
         }
 
         // display winner
         ClearConsole();
         System.out.println("******** Game Over ********");
-        Player winner = GetWinner(client.playerList);
+        Player winner = GetWinner(c.playerList);
         System.out.println("******** Winner is " + winner.GetName() + "! ********");
-        for (int i = 0; i < client.playerList.length; i++)
-            System.out.println(client.playerList[i].GetName() + ": " + client.playerList[i].GetScore());
+        for (int i = 0; i < c.playerList.length; i++)
+            System.out.println(c.playerList[i].GetName() + ": " + c.playerList[i].GetScore() + (c.player.GetID() == c.playerList[i].GetID() ? " (You)" : ""));
 
-        // wait for user input to leave
-        int option;
-        Scanner input = new Scanner(System.in);
-        do {
-            System.out.println("0. Leave");
-            option = input.nextInt();
-        } while (option != 0);
+        if (!TEST_MODE) {
+            // wait for user input to leave
+            int option;
+            Scanner input = new Scanner(System.in);
+            do {
+                System.out.println("0. Leave");
+                option = input.nextInt();
+            } while (option != 0);
 
-        client.Disconnect();
-        Menu();
+            Menu();
+        }
+        c.Disconnect();
     }
 
     public static void Menu() {
@@ -151,22 +175,31 @@ public class Game implements Serializable {
 
     public boolean RollDices(int[] dicesToRoll) {
         if (dicesToRoll.length < 2 || dicesToRoll.length > 8) return false; // at least 2 dices is re-rolled
-        for (int i = 0; i < dicesToRoll.length; i++) { // if trying to re-roll a skull
+        Set<Integer> occurrence = new HashSet<>();
+        for (int i = 0; i < dicesToRoll.length; i++) { // if trying to re-roll a skull or the same die more than once
             if (dices.get(dicesToRoll[i] - 1).equals(Dice.Skull)) {
                 System.out.println("Cannot re-roll a skull!");
                 return false;
             }
+            if (occurrence.contains(dicesToRoll[i])) {
+                System.out.println("Cannot roll the same die more than once!");
+                return false;
+            } else occurrence.add(dicesToRoll[i]);
         }
 
         for (int i = 0; i < dicesToRoll.length; i++)
             dices.set(dicesToRoll[i] - 1, Dice.GetRandomDice());
-        System.out.print("Dices Rolled ~ " + (DidRollThreeSkulls() ? "(SKULLED) ~ " : ""));
-        for (int i = 0; i < dices.size(); i++)
-            System.out.print((i+1) + ": " + dices.get(i) + (i != dices.size()-1 ? ", " : " \n"));
 
+        DisplayDices();
         UpdateScore();
 
         return true;
+    }
+
+    private void DisplayDices() {
+        System.out.print("Dices Rolled ~ " + (DidRollThreeSkulls() ? "(SKULLED) ~ " : ""));
+        for (int i = 0; i < dices.size(); i++)
+            System.out.print((i+1) + ": " + dices.get(i) + (i != dices.size()-1 ? ", " : " \n"));
     }
 
     public int UpdateScore() {

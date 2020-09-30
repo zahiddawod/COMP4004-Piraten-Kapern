@@ -5,13 +5,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-    public static final int MAX_PLAYERS = 2;
+    public static final int MAX_PLAYERS = 3;
     public static final int PORT = 8080;
     public static boolean TEST_MODE;
-    public static int numPlayers = 0;
+    public static int numPlayers;
 
     private boolean isRunning;
-
     private ServerSocket ss;
     private Game game = new Game();
 
@@ -22,6 +21,7 @@ public class Server {
     public static void main(String[] args) { new Server(); }
 
     public Server() {
+        numPlayers = 0;
         System.out.println("[SERVER] Initializing..");
         try {
             ss = new ServerSocket(PORT);
@@ -66,13 +66,13 @@ public class Server {
             for (SocketHandler s : sockets)
                 s.SendPlayers(playerList);
 
-            int currentRound = 0, playerTurn = 0, playerWhoFirstReached6000 = -1; // game starts at round 1 with first player being first one to join
+            int playerTurn = 0, playerWhoFirstReached6000 = -1; // game starts at round 1 with first player being first one to join
             while (!game.IsOver()) {
-                if (playerTurn == 0) System.out.println("******** Round " + (++currentRound) + " ********");
+                if (playerTurn == 0 && game.currentRound != -1) System.out.println("******** Round " + (++game.currentRound) + " ********");
 
                 // update players on round info
                 for (int i = 0; i < numPlayers; i++) {
-                    sockets.get(i).SendInt(currentRound);
+                    sockets.get(i).SendInt(game.currentRound);
                     sockets.get(i).SendInt(playerTurn);
                 }
 
@@ -94,7 +94,7 @@ public class Server {
                 else System.out.println(playerList[playerTurn].GetName() + " ended their turn with a new score of " + playerList[playerTurn].GetScore());
                 if (playerList[playerTurn].GetScore() >= 6000) { // someone reached 6000 initiate final round
                     playerWhoFirstReached6000 = playerTurn;
-                    currentRound = -1;
+                    if (!Game.TEST_MODE) game.currentRound = -1;
                     System.out.println("******** Final Round ********");
                 }
                 playerTurn++;
@@ -104,24 +104,29 @@ public class Server {
             }
 
             System.out.println("******** Game Over ********");
-            Player winner = game.GetWinner(playerList);
-            System.out.println("******** Winner is " + winner.GetName() + "! ********");
+            System.out.println("******** Winner is " + GetWinner().GetName() + "! ********");
             for (int i = 0; i < playerList.length; i++)
                 System.out.println(playerList[i].GetName() + ": " + playerList[i].GetScore());
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Shutdown();
+        if (!Game.TEST_MODE) System.exit(0);
     }
 
     public void Shutdown() {
+        if (!isRunning) return;
         try {
             ss.close();
             isRunning = false;
+            System.out.println("[SERVER] Gracefully shutting down.");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    public Player GetWinner() { return game.GetWinner(playerList); }
+    public int GetCurrentRound() { return game.currentRound; }
     public boolean IsRunning() { return this.isRunning; }
 
     public class SocketHandler implements Runnable {

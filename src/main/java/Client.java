@@ -1,4 +1,3 @@
-import java.awt.*;
 import java.net.*;
 import java.io.*;
 
@@ -7,11 +6,10 @@ public class Client {
 
     public Player player;
     public Player playerList[];
-
     public boolean isConnected;
+    public Game game = new Game();
 
     private Socket socket;
-    private Game game = new Game();
 
     private ObjectInputStream in;
     private ObjectOutputStream out;
@@ -42,7 +40,7 @@ public class Client {
                 SendPlayer();
                 player.SetID(GetInt());
                 UpdatePlayerList();
-                game.GameLoop();
+                game.GameLoop(this);
             }
         } catch (IOException e) {
             System.out.println("Failed to connect.");
@@ -52,6 +50,7 @@ public class Client {
     }
 
     public void Disconnect() {
+        if (!isConnected) return;
         try {
             this.socket.close();
             isConnected = false;
