@@ -9,6 +9,7 @@ public class Game implements Serializable {
     public static boolean TEST_MODE;
 
     public int currentRound;
+    public ArrayList<Dice> desiredDices;
 
     private boolean isGameOver;
     private ArrayList<Dice> dices = new ArrayList<>();
@@ -174,7 +175,10 @@ public class Game implements Serializable {
     }
 
     public boolean RollDices(int[] dicesToRoll) {
-        if (dicesToRoll.length < 2 || dicesToRoll.length > 8) return false; // at least 2 dices is re-rolled
+        if (dicesToRoll.length < 2 || dicesToRoll.length > 8) { // at least 2 dices must be rolled
+            System.out.println("You must roll at least 2 dices!");
+            return false;
+        }
         Set<Integer> occurrence = new HashSet<>();
         for (int i = 0; i < dicesToRoll.length; i++) { // if trying to re-roll a skull or the same die more than once
             if (dices.get(dicesToRoll[i] - 1).equals(Dice.Skull)) {
@@ -188,7 +192,7 @@ public class Game implements Serializable {
         }
 
         for (int i = 0; i < dicesToRoll.length; i++)
-            dices.set(dicesToRoll[i] - 1, Dice.GetRandomDice());
+            dices.set(dicesToRoll[i] - 1, (desiredDices != null ? desiredDices.get(i) : Dice.GetRandomDice()));
 
         DisplayDices();
         UpdateScore();
@@ -222,10 +226,14 @@ public class Game implements Serializable {
 
         if (sets.get(Dice.Skull) >= 3) return 0; // player gets nothing if 3 or more skulls were drawn
 
-        Map<Integer, Integer> pointsForIdentical = new HashMap<Integer, Integer>() {{ put(3, 100); put(4, 200); put(5, 500); put(6, 1000); put(7, 2000); put (8, 4000); }};
-        for (Map.Entry<Dice, Integer> s : sets.entrySet()) // account for sets of identical dices
+        Map<Integer, Integer> pointsForIdentical = new HashMap<Integer, Integer>() {{ put(3, 100); put(4, 200); put(5, 500); put(6, 1000); put(7, 2000); put (8, 4000); put(9, 4000); }};
+        boolean isFullChest = true;
+        for (Map.Entry<Dice, Integer> s : sets.entrySet()) { // account for sets of identical dices
+            if ((s.getValue() == 1 || s.getValue() == 2) && (s.getKey() == Dice.Parrot || s.getKey() == Dice.Monkey || s.getKey() == Dice.Sword || s.getKey() == Dice.Skull)) isFullChest = false;
             totalScore += pointsForIdentical.getOrDefault(s.getValue(), 0);
+        }
 
+        if (isFullChest) totalScore += 500;
         totalScore += sets.get(Dice.Diamond) * 100;
         totalScore += sets.get(Dice.Coin) * 100;
 
@@ -284,7 +292,10 @@ public class Game implements Serializable {
     public void SetDices(ArrayList<Dice> list) { dices = list; }
     public ArrayList<Dice> GetDices() { return dices; }
     public ArrayList<FortuneCard> GetDeck() { return deck; }
-    public void SetDrawnCard(FortuneCard card) { drawnCard = card; }
+    public void SetDrawnCard(FortuneCard card) {
+        drawnCard = card;
+        System.out.println("Fortune Card Dealt ~ " + drawnCard);
+    }
     public boolean IsOver() { return isGameOver; }
     public void End() { isGameOver = true; }
 
