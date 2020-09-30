@@ -64,7 +64,9 @@ public class TestGame {
         dices.add(Dice.Skull);
         game.SetDices(dices);
         assertEquals(false, game.DidRollThreeSkulls());
-        game.SetDrawnCard(FortuneCard.SkullTwo);
+        dices.set(0, Dice.Skull);
+        dices.set(1, Dice.Skull);
+        game.SetDices(dices);
         assertEquals(true, game.DidRollThreeSkulls());
     }
 
@@ -127,14 +129,12 @@ public class TestGame {
         dices.add(Dice.Diamond);
         dices.add(Dice.Coin);
         dices.add(Dice.Diamond);
-        dices.add(Dice.Parrot);
-        dices.add(Dice.Monkey);
+        dices.add(Dice.Skull);
+        dices.add(Dice.Skull);
         dices.add(Dice.Monkey);
         dices.add(Dice.Skull);
-        game.SetDrawnCard(FortuneCard.SkullOne);
         game.SetDices(dices);
-        assertEquals(500, game.UpdateScore());
-        game.SetDrawnCard(FortuneCard.SkullTwo);
+        game.SetDrawnCard(FortuneCard.Coin);
         assertEquals(0, game.UpdateScore());
     }
 
