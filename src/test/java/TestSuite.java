@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 @SelectClasses({
         TestNetworking.class,
         TestPlayer.class,
-        TestGame.class
+        TestGame.class,
+        TestGridPartOne.class
 })
 public class TestSuite {}
