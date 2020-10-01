@@ -225,6 +225,7 @@ public class Game implements Serializable {
             sets.replace(dices.get(i), sets.get(dices.get(i)) + 1);
 
         // check for bonus from drawn fortune card
+        int amountToAddForSwords = 0;
         if (drawnCard == FortuneCard.Coin)
             sets.replace(Dice.Coin, sets.get(Dice.Coin) + 1);
         else if (drawnCard == FortuneCard.Diamond)
@@ -233,8 +234,19 @@ public class Game implements Serializable {
             sets.replace(Dice.Skull, sets.get(Dice.Skull) + 1);
         else if (drawnCard == FortuneCard.SkullTwo)
             sets.replace(Dice.Skull, sets.get(Dice.Skull) + 2);
+        else if (drawnCard == FortuneCard.SabreTwo) {
+            totalScore += 300;
+            amountToAddForSwords = 2;
+        } else if (drawnCard == FortuneCard.SabreThree) {
+            totalScore += 500;
+            amountToAddForSwords = 3;
+        } else if (drawnCard == FortuneCard.SabreFour) {
+            totalScore += 1000;
+            amountToAddForSwords = 4;
+        }
+        sets.replace(Dice.Sword, sets.get(Dice.Sword) + amountToAddForSwords);
 
-        if (sets.get(Dice.Skull) >= 3) return 0; // player gets nothing if 3 or more skulls were drawn
+        if (sets.get(Dice.Skull) >= 3) return 0; // player dies if 3 skulls were rolled
 
         // check for sets of identical dices
         Map<Integer, Integer> pointsForIdentical = new HashMap<Integer, Integer>() {{ put(3, 100); put(4, 200); put(5, 500); put(6, 1000); put(7, 2000); put (8, 4000); put(9, 4000); }};
@@ -248,7 +260,8 @@ public class Game implements Serializable {
         } else {
             for (Map.Entry<Dice, Integer> s : sets.entrySet()) {
                 if ((s.getValue() == 1 || s.getValue() == 2) && (s.getKey() == Dice.Parrot || s.getKey() == Dice.Monkey || s.getKey() == Dice.Sword || s.getKey() == Dice.Skull)) isFullChest = false;
-                totalScore += pointsForIdentical.getOrDefault(s.getValue(), 0);
+                if ((drawnCard == FortuneCard.SabreTwo || drawnCard == FortuneCard.SabreThree || drawnCard == FortuneCard.SabreFour) && s.getKey() == Dice.Sword) totalScore += pointsForIdentical.getOrDefault(s.getValue()-amountToAddForSwords, 0);
+                else totalScore += pointsForIdentical.getOrDefault(s.getValue(), 0);
             }
         }
         if (isFullChest) totalScore += 500;
