@@ -190,7 +190,8 @@ public class Game implements Serializable {
         }
         if (numOfSkulls > 0) { // if trying to re-roll a skull without sorceress or more than 1
             if (drawnCard == FortuneCard.Sorceress) {
-                if (numOfSkulls > 1) {
+                if (numOfSkulls == 1) drawnCard = null; // sorceress must be discarded after use
+                else if (numOfSkulls > 1) {
                     System.out.println("Can only re-roll one skull with Sorceress!");
                     return false;
                 }
