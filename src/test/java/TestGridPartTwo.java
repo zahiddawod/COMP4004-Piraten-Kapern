@@ -89,4 +89,52 @@ public class TestGridPartTwo {
         assertEquals(true, game.RollDices(new int[]{4,5,6,7}));
         assertEquals(2000, game.UpdateScore());
     }
+
+    @Test
+    public void Test101() {
+        Game game = new Game();
+        game.SetDrawnCard(FortuneCard.Coin);
+        game.desiredDices = new ArrayList<Dice>() {{ add(Dice.Monkey); add(Dice.Monkey); add(Dice.Monkey); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Diamond); add(Dice.Parrot); }};
+        assertEquals(true, game.RollDices(new int[]{1,2,3,4,5,6,7,8}));
+        assertEquals(400, game.UpdateScore());
+    }
+
+    @Test
+    public void Test102() {
+        Game game = new Game();
+        game.SetDrawnCard(FortuneCard.Captain);
+        game.desiredDices = new ArrayList<Dice>() {{ add(Dice.Monkey); add(Dice.Monkey); add(Dice.Monkey); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Coin); add(Dice.Coin); }};
+        assertEquals(true, game.RollDices(new int[]{1,2,3,4,5,6,7,8}));
+        assertEquals(1800, game.UpdateScore());
+    }
+
+    @Test
+    public void Test103() {
+        Game game = new Game();
+        game.SetDrawnCard(FortuneCard.Coin);
+        game.desiredDices = new ArrayList<Dice>() {{ add(Dice.Monkey); add(Dice.Monkey); add(Dice.Monkey); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Diamond); }};
+        assertEquals(true, game.RollDices(new int[]{1,2,3,4,5,6,7,8}));
+        assertEquals(1000, game.UpdateScore());
+    }
+
+    @Test
+    public void Test104() {
+        Game game = new Game();
+        game.SetDrawnCard(FortuneCard.SabreTwo);
+        game.desiredDices = new ArrayList<Dice>() {{ add(Dice.Monkey); add(Dice.Monkey); add(Dice.Monkey); add(Dice.Monkey); add(Dice.Sword); add(Dice.Parrot); add(Dice.Parrot); add(Dice.Coin); }};
+        assertEquals(true, game.RollDices(new int[]{1,2,3,4,5,6,7,8}));
+        assertEquals(600, game.UpdateScore());
+        game.desiredDices = new ArrayList<Dice>() {{ add(Dice.Coin); add(Dice.Sword); }};
+        assertEquals(true, game.RollDices(new int[]{6,7}));
+        assertEquals(1200, game.UpdateScore());
+    }
+
+    @Test
+    public void Test107() {
+        Game game = new Game();
+        game.SetDrawnCard(FortuneCard.MonkeyBusiness);
+        game.desiredDices = new ArrayList<Dice>() {{ add(Dice.Monkey); add(Dice.Monkey); add(Dice.Parrot); add(Dice.Coin); add(Dice.Coin); add(Dice.Diamond); add(Dice.Diamond); add(Dice.Diamond); }};
+        assertEquals(true, game.RollDices(new int[]{1,2,3,4,5,6,7,8}));
+        assertEquals(1200, game.UpdateScore());
+    }
 }
