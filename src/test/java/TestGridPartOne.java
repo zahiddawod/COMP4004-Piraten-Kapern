@@ -1,12 +1,9 @@
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.io.*;
-import java.awt.*;
 
 public class TestGridPartOne {
     private ExecutorService executor;

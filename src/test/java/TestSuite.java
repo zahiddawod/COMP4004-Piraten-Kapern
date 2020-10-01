@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
         TestNetworking.class,
         TestPlayer.class,
         TestGame.class,
-        TestGridPartOne.class
+        TestGridPartOne.class,
+        TestGridPartTwo.class
 })
 public class TestSuite {}
