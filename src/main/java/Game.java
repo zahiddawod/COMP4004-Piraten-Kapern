@@ -180,15 +180,24 @@ public class Game implements Serializable {
             return false;
         }
         Set<Integer> occurrence = new HashSet<>();
-        for (int i = 0; i < dicesToRoll.length; i++) { // if trying to re-roll a skull or the same die more than once
-            if (dices.get(dicesToRoll[i] - 1).equals(Dice.Skull)) {
-                System.out.println("Cannot re-roll a skull!");
-                return false;
-            }
+        int numOfSkulls = 0;
+        for (int i = 0; i < dicesToRoll.length; i++) { // counting how many skulls are being attempted for re-roll or the same die more than once
+            if (dices.get(dicesToRoll[i] - 1).equals(Dice.Skull)) numOfSkulls++;
             if (occurrence.contains(dicesToRoll[i])) {
                 System.out.println("Cannot roll the same die more than once!");
                 return false;
             } else occurrence.add(dicesToRoll[i]);
+        }
+        if (numOfSkulls > 0) { // if trying to re-roll a skull without sorceress or more than 1
+            if (drawnCard == FortuneCard.Sorceress) {
+                if (numOfSkulls > 1) {
+                    System.out.println("Can only re-roll one skull with Sorceress!");
+                    return false;
+                }
+            } else {
+                System.out.println("Cannot re-roll a skull!");
+                return false;
+            }
         }
 
         for (int i = 0; i < dicesToRoll.length; i++)
