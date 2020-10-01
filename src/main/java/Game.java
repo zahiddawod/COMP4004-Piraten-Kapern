@@ -236,13 +236,21 @@ public class Game implements Serializable {
 
         if (sets.get(Dice.Skull) >= 3) return 0; // player gets nothing if 3 or more skulls were drawn
 
+        // check for sets of identical dices
         Map<Integer, Integer> pointsForIdentical = new HashMap<Integer, Integer>() {{ put(3, 100); put(4, 200); put(5, 500); put(6, 1000); put(7, 2000); put (8, 4000); put(9, 4000); }};
         boolean isFullChest = true;
-        for (Map.Entry<Dice, Integer> s : sets.entrySet()) { // account for sets of identical dices
-            if ((s.getValue() == 1 || s.getValue() == 2) && (s.getKey() == Dice.Parrot || s.getKey() == Dice.Monkey || s.getKey() == Dice.Sword || s.getKey() == Dice.Skull)) isFullChest = false;
-            totalScore += pointsForIdentical.getOrDefault(s.getValue(), 0);
+        if (drawnCard == FortuneCard.MonkeyBusiness) {
+            totalScore += pointsForIdentical.getOrDefault(sets.get(Dice.Monkey) + sets.get(Dice.Parrot), 0);
+            for (Map.Entry<Dice, Integer> s : sets.entrySet()) {
+                if ((s.getValue() == 1 || s.getValue() == 2) && (s.getKey() == Dice.Sword || s.getKey() == Dice.Skull)) isFullChest = false;
+                if (s.getKey() != Dice.Monkey && s.getKey() != Dice.Parrot) totalScore += pointsForIdentical.getOrDefault(s.getValue(), 0);
+            }
+        } else {
+            for (Map.Entry<Dice, Integer> s : sets.entrySet()) {
+                if ((s.getValue() == 1 || s.getValue() == 2) && (s.getKey() == Dice.Parrot || s.getKey() == Dice.Monkey || s.getKey() == Dice.Sword || s.getKey() == Dice.Skull)) isFullChest = false;
+                totalScore += pointsForIdentical.getOrDefault(s.getValue(), 0);
+            }
         }
-
         if (isFullChest) totalScore += 500;
         totalScore += sets.get(Dice.Diamond) * 100;
         totalScore += sets.get(Dice.Coin) * 100;
