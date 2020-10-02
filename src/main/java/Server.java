@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-    public static final int MAX_PLAYERS = 2;
+    public static final int MAX_PLAYERS = 3;
     public static final int PORT = 8080;
     public static boolean TEST_MODE;
     public static int numPlayers;
@@ -84,9 +84,13 @@ public class Server {
                 int result = sockets.get(playerTurn).GetInt();
                 // if player came from skull island deduct from other players
                 if (result < 0) {
-                    for (int i = 0; i < sockets.size(); i++)
-                        if (!playerList[i].GetName().equals(playerList[playerTurn].GetName()))
-                            playerList[i].DeductPoints(-result);
+                    if (game.GetDrawnCard() == FortuneCard.SabreTwo || game.GetDrawnCard() == FortuneCard.SabreThree || game.GetDrawnCard() == FortuneCard.SabreFour)
+                        playerList[playerTurn].SetScore(playerList[playerTurn].GetScore() + result);
+                    else {
+                        for (int i = 0; i < sockets.size(); i++)
+                            if (!playerList[i].GetName().equals(playerList[playerTurn].GetName()))
+                                playerList[i].DeductPoints(-result);
+                    }
                 } else playerList[playerTurn].SetScore(playerList[playerTurn].GetScore() + result);
 
                 // update player scores for everyone
