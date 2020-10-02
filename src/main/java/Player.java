@@ -32,4 +32,9 @@ public class Player implements Serializable {
     }
     public void SetScore(int score) { this.score = score; }
     public void SetID(int id) { this.myId = id; }
+    public void DeductPoints(int amount) {
+        this.score -= amount;
+        if (this.score < 0) this.score = 0;
+        System.out.println(this.name + " lost " + amount + " points. New Score: " + this.score);
+    }
 }

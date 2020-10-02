@@ -6,12 +6,12 @@ public class Game implements Serializable {
     public static final int CLEAR_CONSOLE_LENGTH = 50;
     public static final String TITLE = "-=Piraten Kapern=-";
     public static final Client client = new Client("");
-    public static boolean TEST_MODE;
+    public static boolean TEST_MODE = false;
 
     public int currentRound;
     public ArrayList<Dice> desiredDices;
 
-    private boolean isGameOver;
+    private boolean isGameOver, inSkullIsland, didRollAtLeastOneSkull;
     private ArrayList<Dice> dices = new ArrayList<>();
     private ArrayList<FortuneCard> deck = new ArrayList<>();
     private FortuneCard drawnCard;
@@ -26,6 +26,7 @@ public class Game implements Serializable {
 
     public Game() {
         this.isGameOver = false;
+        this.inSkullIsland = false;
         ResetDices();
         InitializeDeck();
     }
@@ -46,35 +47,90 @@ public class Game implements Serializable {
                 // draw fortune card
                 drawnCard = c.GetCard();
 
+                inSkullIsland = false;
                 if (TEST_MODE) {
                     if (c.player.GetName().contains("test40")) {
                         if (c.player.GetName().equals("p1test40"))
-                            SetDices(new ArrayList<Dice>() {{ add(Dice.Skull); add(Dice.Skull); add(Dice.Skull); add(Dice.Parrot); add(Dice.Sword); add(Dice.Coin); add(Dice.Coin); add(Dice.Diamond); }});
+                            SetDices(new ArrayList<Dice>() {{
+                                add(Dice.Skull);
+                                add(Dice.Skull);
+                                add(Dice.Skull);
+                                add(Dice.Parrot);
+                                add(Dice.Sword);
+                                add(Dice.Coin);
+                                add(Dice.Coin);
+                                add(Dice.Diamond);
+                            }});
                         else if (c.player.GetName().equals("p2test40"))
-                            SetDices(new ArrayList<Dice>() {{ add(Dice.Skull); add(Dice.Parrot); add(Dice.Parrot); add(Dice.Parrot); add(Dice.Sword); add(Dice.Monkey); add(Dice.Monkey); add(Dice.Sword); }});
+                            SetDices(new ArrayList<Dice>() {{
+                                add(Dice.Skull);
+                                add(Dice.Parrot);
+                                add(Dice.Parrot);
+                                add(Dice.Parrot);
+                                add(Dice.Sword);
+                                add(Dice.Monkey);
+                                add(Dice.Monkey);
+                                add(Dice.Sword);
+                            }});
                         else if (c.player.GetName().equals("p3test40")) {
                             drawnCard = FortuneCard.Captain;
-                            SetDices(new ArrayList<Dice>() {{ add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); }});
+                            SetDices(new ArrayList<Dice>() {{
+                                add(Dice.Sword);
+                                add(Dice.Sword);
+                                add(Dice.Sword);
+                                add(Dice.Sword);
+                                add(Dice.Sword);
+                                add(Dice.Sword);
+                                add(Dice.Sword);
+                                add(Dice.Sword);
+                            }});
                         }
                     } else if (c.player.GetName().contains("test43")) {
                         if (c.player.GetName().equals("p1test43"))
-                            SetDices(new ArrayList<Dice>() {{ add(Dice.Skull); add(Dice.Parrot); add(Dice.Skull); add(Dice.Parrot); add(Dice.Sword); add(Dice.Coin); add(Dice.Coin); add(Dice.Diamond); }});
+                            SetDices(new ArrayList<Dice>() {{
+                                add(Dice.Skull);
+                                add(Dice.Parrot);
+                                add(Dice.Skull);
+                                add(Dice.Parrot);
+                                add(Dice.Sword);
+                                add(Dice.Coin);
+                                add(Dice.Coin);
+                                add(Dice.Diamond);
+                            }});
                         else if (c.player.GetName().equals("p2test43")) {
                             drawnCard = FortuneCard.SkullTwo;
-                            SetDices(new ArrayList<Dice>() {{ add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); add(Dice.Sword); }});
+                            SetDices(new ArrayList<Dice>() {{
+                                add(Dice.Sword);
+                                add(Dice.Sword);
+                                add(Dice.Sword);
+                                add(Dice.Sword);
+                                add(Dice.Sword);
+                                add(Dice.Sword);
+                                add(Dice.Sword);
+                                add(Dice.Sword);
+                            }});
                         } else if (c.player.GetName().equals("p3test43"))
-                            SetDices(new ArrayList<Dice>() {{ add(Dice.Skull); add(Dice.Parrot); add(Dice.Diamond); add(Dice.Parrot); add(Dice.Sword); add(Dice.Monkey); add(Dice.Monkey); add(Dice.Sword); }});
+                            SetDices(new ArrayList<Dice>() {{
+                                add(Dice.Skull);
+                                add(Dice.Parrot);
+                                add(Dice.Diamond);
+                                add(Dice.Parrot);
+                                add(Dice.Sword);
+                                add(Dice.Monkey);
+                                add(Dice.Monkey);
+                                add(Dice.Sword);
+                            }});
                     }
                     System.out.println("Fortune Card Dealt ~ " + drawnCard);
                     DisplayDices();
                 } else {
                     System.out.println("Fortune Card Dealt ~ " + drawnCard);
-                    RollDices(new int[]{1,2,3,4,5,6,7,8}); // roll all 8 dice
+                    RollDices(new int[]{1, 2, 3, 4, 5, 6, 7, 8}); // roll all 8 dice
                 }
 
                 int option = 0;
                 do {
-                    if (DidRollThreeSkulls()) {
+                    if (DidRollThreeSkulls() || (inSkullIsland && !didRollAtLeastOneSkull)) {
                         Sleep(2000);
                         break;
                     }
@@ -97,20 +153,29 @@ public class Game implements Serializable {
                         } while (choices.length < 2);
 
                         int[] dicesToReRoll = new int[choices.length];
-                        for (int i = 0; i < choices.length; i++)
+                        for (int i = 0; i < choices.length; i++) {
                             dicesToReRoll[i] = Integer.parseInt(choices[i]);
+                            if (dicesToReRoll[i] < 0 || dicesToReRoll[i] > 8) {
+                                System.out.println(dicesToReRoll[i] + " is not a valid dice.");
+                                dicesToReRoll = new int[]{0};
+                                break;
+                            }
+                        }
                         RollDices(dicesToReRoll);
                     }
                 } while (option != 0);
                 int addToScore = UpdateScore();
-                c.player.SetScore(c.player.GetScore() + addToScore);
+                if (addToScore > 0) c.player.SetScore(c.player.GetScore() + addToScore);
                 c.SendInt(addToScore);
             } else {
                 System.out.println("Waiting for " + c.playerList[playerTurn].GetName() + " to complete their turn..");
             }
             ResetDices();
-            for (int i = 0; i < c.playerList.length; i++) // update player scores
-                c.playerList[i].SetScore(c.GetInt());
+            for (int i = 0; i < c.playerList.length; i++) { // update player scores
+                int score = c.GetInt();
+                c.playerList[i].SetScore(score);
+                if (c.playerList[i].GetID() == c.player.GetID()) c.player.SetScore(score);
+            }
             isGameOver = (c.GetInt() > 0);
         }
 
@@ -201,8 +266,11 @@ public class Game implements Serializable {
             }
         }
 
-        for (int i = 0; i < dicesToRoll.length; i++)
+        didRollAtLeastOneSkull = false;
+        for (int i = 0; i < dicesToRoll.length; i++) {
             dices.set(dicesToRoll[i] - 1, (desiredDices != null ? desiredDices.get(i) : Dice.GetRandomDice()));
+            if (dices.get(dicesToRoll[i] - 1) == Dice.Skull) didRollAtLeastOneSkull = true;
+        }
 
         DisplayDices();
         UpdateScore();
@@ -246,7 +314,18 @@ public class Game implements Serializable {
         }
         sets.replace(Dice.Sword, sets.get(Dice.Sword) + amountToAddForSwords);
 
-        if (sets.get(Dice.Skull) >= 3) return 0; // player dies if 3 skulls were rolled
+        // player dies if 3 skulls were rolled else if more than 3 return -100 per skull
+        int numOfSkulls = sets.get(Dice.Skull);
+        if (numOfSkulls == 3) return 0;
+        else if (numOfSkulls > 3) {
+            if (!inSkullIsland) {
+                System.out.println("Welcome to the Island of Skull! \nNOTE: Skull Points is how many points the other players will lose! Try to get as many skulls as you can (1 skull = -100 points)");
+                inSkullIsland = true;
+            }
+            int points = -(numOfSkulls*100);
+            System.out.println("Skull Points: " + points);
+            return points;
+        }
 
         // check for sets of identical dices
         Map<Integer, Integer> pointsForIdentical = new HashMap<Integer, Integer>() {{ put(3, 100); put(4, 200); put(5, 500); put(6, 1000); put(7, 2000); put (8, 4000); put(9, 4000); }};
@@ -305,10 +384,8 @@ public class Game implements Serializable {
         int counter = 0;
         if (drawnCard == FortuneCard.SkullOne) counter = 1;
         else if (drawnCard == FortuneCard.SkullTwo) counter = 2;
-        for (Dice d : dices) {
-            if (d.equals(Dice.Skull)) counter++;
-            if (counter >= 3) return true;
-        }
+        for (Dice d : dices) if (d.equals(Dice.Skull)) counter++;
+        if (counter == 3) return true;
         return false;
     }
 
