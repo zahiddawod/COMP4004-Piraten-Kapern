@@ -1,4 +1,4 @@
-# COMP4004 Piraten Kapern (Assignment 1)
+# COMP4004 Piraten Kapern (Assignment 1 & 2)
 Zahid Dawod
 101041370
 
