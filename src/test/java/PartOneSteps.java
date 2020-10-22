@@ -9,6 +9,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class PartOneSteps {
     Game game = new Game();
+    Player testPlayer = new Player("Zahid");
+
+    public PartOneSteps() {
+        System.out.println("\n******** " + ("Round " + (game.currentRound+1)) + " ********");
+    }
 
     @Given("I roll three skulls")
     public void iRollThreeSkulls() {
@@ -21,6 +26,12 @@ public class PartOneSteps {
         game.desiredDices = StringToDiceArrayList(arg1);
         game.RollDices(WhichDicesToRoll(arg0));
     }
+
+    @Given("My score is {int}")
+    public void myScoreIs(int arg0) { testPlayer.SetScore(arg0); }
+
+    @When("I lost {int} points")
+    public void iLostPointsWhenMyScoreIs(int arg0) { testPlayer.DeductPoints(arg0); }
 
     @And("I re-roll dices at {string} with {string}")
     public void iReRollDicesAtWith(String arg0, String arg1) {
@@ -37,13 +48,32 @@ public class PartOneSteps {
     @Then("I should be dead")
     public void iShouldBeDead() {
         assertTrue(game.DidRollThreeSkulls() || (game.InSkullIsland() && !game.DidRollAtLeastOneSkull()));
-        System.out.println("You died " + (game.InSkullIsland() ? "in Skull Island by not rolling at least one skull." : "from rolling three skulls."));
+        System.out.println("You died " + (game.InSeaBattle() ? "from rolling 3 or more skulls during sea battle" : (game.InSkullIsland() ? "in Skull Island by not rolling at least one skull." : "from rolling three skulls.")));
+    }
+
+    @And("Dice {int} should still be {string}")
+    @Then("Dice {int} should be {string}")
+    public void diceShouldBe(int arg0, String arg1) {
+        assertEquals(Dice.valueOf(arg1), game.GetDices().get(arg0-1));
     }
 
     @Then("Score should be {int}")
     public void scoreShouldBe(int expectedScore) {
         assertEquals(expectedScore, game.potentialScore);
     }
+    @And("I should lose {int} points")
+    public void iShouldLosePoints(int arg0) { scoreShouldBe(-arg0); }
+
+    @Then("Go to next round")
+    public void goToNextRound() {
+        if (game.potentialScore <= 0) return;
+        Game.client.player.SetScore(Game.client.player.GetScore() + game.potentialScore);
+        game.currentRound++;
+        System.out.println("\n******** " + ("Round " + (game.currentRound+1)) + " ********");
+    }
+
+    @Then("Player score should be {int}")
+    public void playerScoreShouldBe(int arg0) { assertEquals(arg0, testPlayer.GetScore()); }
 
     private ArrayList<Dice> StringToDiceArrayList(String str) {
         ArrayList<Dice> list = new ArrayList<Dice>();

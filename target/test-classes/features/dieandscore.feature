@@ -170,3 +170,4 @@ Feature: Basic Dying and Scoring
   Scenario: Score with 7 Swords on first roll, and try to re-roll 8th die
     Given I roll dices at "1,2,3,4,5,6,7,8" with "Sword,Sword,Sword,Sword,Sword,Sword,Sword,Monkey"
     Then I re-roll dices at "8" with "Sword"
+    And Dice 8 should still be "Monkey"

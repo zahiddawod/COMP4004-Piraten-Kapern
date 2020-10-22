@@ -203,7 +203,7 @@ public class Game implements Serializable {
         if (numOfSkulls > 0) { // if trying to re-roll a skull without sorceress or more than 1
             if (drawnCard == FortuneCard.Sorceress) {
                 if (numOfSkulls == 1) drawnCard = null; // sorceress must be discarded after use
-                else if (numOfSkulls > 1) {
+                else {
                     System.out.println("Can only re-roll one skull with Sorceress!");
                     return false;
                 }
@@ -263,16 +263,19 @@ public class Game implements Serializable {
 
         // player dies if 3 skulls were rolled else if more than 3 return -100 per skull
         int numOfSkulls = sets.get(Dice.Skull);
-        if (numOfSkulls == 3) return (amountToAddForSwords == 0 ? 0 : -totalScore);
-        else if (numOfSkulls > 3) {
+        if (numOfSkulls == 3) {
+            this.potentialScore = (amountToAddForSwords == 0) ? 0 : -totalScore;
+            return this.potentialScore;
+        } else if (numOfSkulls > 3) {
             if (amountToAddForSwords != 0) return 0; // we're in sea battle and can't go to island of skull
             if (!inSkullIsland) {
                 System.out.println("Welcome to the Island of Skull! \nNOTE: Skull Points is how many points the other players will lose! Try to get as many skulls as you can (1 skull = -100 points)");
                 inSkullIsland = true;
             }
-            int points = -(numOfSkulls*100);
-            System.out.println("Skull Points: " + points);
-            return points;
+            this.potentialScore = -(numOfSkulls*100);
+            if (drawnCard == FortuneCard.Captain) this.potentialScore *= 2;
+            System.out.println("Skull Points: " + this.potentialScore);
+            return this.potentialScore;
         }
 
         // check for sets of identical dices
@@ -335,7 +338,7 @@ public class Game implements Serializable {
         if (drawnCard == FortuneCard.SkullOne) counter = 1;
         else if (drawnCard == FortuneCard.SkullTwo) counter = 2;
         for (Dice d : dices) if (d.equals(Dice.Skull)) counter++;
-        if (counter == 3) return true;
+        if (counter == 3 || (InSeaBattle() && counter >= 3)) return true;
         return false;
     }
 
@@ -359,6 +362,7 @@ public class Game implements Serializable {
     public void End() { isGameOver = true; }
     public boolean InSkullIsland() { return inSkullIsland; }
     public boolean DidRollAtLeastOneSkull() { return didRollAtLeastOneSkull; }
+    public boolean InSeaBattle() { return (drawnCard == FortuneCard.SabreTwo || drawnCard == FortuneCard.SabreThree || drawnCard == FortuneCard.SabreFour); }
 
     public static void ClearConsole() { for (int i = 0; i < CLEAR_CONSOLE_LENGTH; i++) System.out.println("\b");  }
     public static void Sleep(int milliseconds) { try { Thread.sleep(milliseconds); } catch (InterruptedException ie) { ie.printStackTrace(); } }
