@@ -8,7 +8,7 @@ public class Game implements Serializable {
     public static final Client client = new Client("");
     public static boolean TEST_MODE = false;
 
-    public int currentRound;
+    public int currentRound, potentialScore;
     public ArrayList<Dice> desiredDices;
 
     private boolean isGameOver, inSkullIsland, didRollAtLeastOneSkull;
@@ -27,6 +27,7 @@ public class Game implements Serializable {
     public Game() {
         this.isGameOver = false;
         this.inSkullIsland = false;
+        this.potentialScore = 0;
         ResetDices();
         InitializeDeck();
     }
@@ -299,6 +300,8 @@ public class Game implements Serializable {
         System.out.println("Current Score: " + client.player.GetScore());
         System.out.println("Potential Score: " + (client.player.GetScore() + totalScore));
 
+        this.potentialScore = totalScore;
+
         return totalScore;
     }
 
@@ -354,6 +357,8 @@ public class Game implements Serializable {
     public FortuneCard GetDrawnCard() { return drawnCard; }
     public boolean IsOver() { return isGameOver; }
     public void End() { isGameOver = true; }
+    public boolean InSkullIsland() { return inSkullIsland; }
+    public boolean DidRollAtLeastOneSkull() { return didRollAtLeastOneSkull; }
 
     public static void ClearConsole() { for (int i = 0; i < CLEAR_CONSOLE_LENGTH; i++) System.out.println("\b");  }
     public static void Sleep(int milliseconds) { try { Thread.sleep(milliseconds); } catch (InterruptedException ie) { ie.printStackTrace(); } }
