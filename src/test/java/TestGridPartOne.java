@@ -325,19 +325,5 @@ public class TestGridPartOne {
         game.desiredDices = new ArrayList<Dice>() {{ add(Dice.Diamond); }};
         assertEquals(false, game.RollDices(new int[]{8}));
     }
-
-    class EmulateServer extends Thread {
-        public Server instance;
-        public void run() { instance = new Server(); }
-    }
-
-    class EmulateClient extends Thread {
-        public String name;
-        public Client instance;
-
-        public void run() {
-            instance = new Client(name);
-            instance.Join("localhost");
-        }
-    }
 }
+
